@@ -9,6 +9,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 /**
  *
@@ -30,7 +33,19 @@ public class MasterDetail extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        launch(args);
+        
+        String url = "jdbc:mysql://localhost:3306/MasterDetail";
+        String username = "root";
+        String password = "123456";
+
+        try {
+            Connection connection = DriverManager.getConnection(url, username, password);
+            System.out.println("Connected to the database!");
+            // Perform database operations here
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
     
 }
