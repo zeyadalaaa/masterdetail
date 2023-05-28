@@ -9,12 +9,12 @@
 <AnchorPane id="AnchorPane" prefHeight="416.0" prefWidth="643.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="masterdetail.FXMLDocumentController">
     <children>
         <Button fx:id="AddButton" layoutX="61.0" layoutY="262.0" onAction="#handleAddButtonAction" prefHeight="25.0" prefWidth="51.0" text="Add" />
-      <Button fx:id="UpdateButton" layoutX="134.0" layoutY="262.0" text="Update" />
+      <Button fx:id="UpdateButton" layoutX="134.0" layoutY="262.0" onAction="#handleUpdateButtonAction" text="Update" />
       <Button fx:id="DeleteButton" layoutX="208.0" layoutY="262.0" onAction="#handleDeleteButtonAction" text="Delete" />
       <Label layoutX="61.0" layoutY="110.0" text="Name" />
       <Label layoutX="61.0" layoutY="149.0" text="Age" />
       <Label layoutX="61.0" layoutY="191.0" text="Email" />
-      <TableView fx:id="tableView" layoutX="322.0" layoutY="99.0" onMouseClicked="#TableMouseClickAction" prefHeight="200.0" prefWidth="297.0" />
+      <TableView fx:id="tableView" layoutX="322.0" layoutY="91.0" onMouseClicked="#TableMouseClickAction" prefHeight="200.0" prefWidth="297.0" />
       <TextField fx:id="firstNameText" layoutX="107.0" layoutY="107.0" prefHeight="25.0" prefWidth="77.0" />
       <TextField fx:id="lastNameText" layoutX="191.0" layoutY="107.0" prefHeight="25.0" prefWidth="77.0" />
       <TextField fx:id="ageText" layoutX="105.0" layoutY="147.0" prefHeight="25.0" prefWidth="163.0" />
