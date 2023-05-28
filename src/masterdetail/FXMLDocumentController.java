@@ -15,6 +15,13 @@ import javafx.scene.control.TextField;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.control.TableView;
+import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -31,6 +38,10 @@ public class FXMLDocumentController implements Initializable {
     private TextField ageText;
     @FXML
     private TextField emailText;
+    @FXML
+    TableView<Employee> tableView;
+    
+    
     
     @FXML
     private void handleAddButtonAction(ActionEvent event) {
@@ -56,10 +67,14 @@ public class FXMLDocumentController implements Initializable {
             stmt.setString(3, age);
             stmt.setString(4, email);
             stmt.executeUpdate();
-            System.out.println("Record added successfully...");
             
             stmt.close();
             connection.close();
+            
+            Stage currentStage = (Stage) firstNameText.getScene().getWindow();
+            currentStage.close();
+            MasterDetail masterDetail = new MasterDetail();
+            masterDetail.start(new Stage());
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
@@ -76,7 +91,18 @@ public class FXMLDocumentController implements Initializable {
          }
         
     }
-    
+   
+    @FXML
+    private void TableMouseClickAction(MouseEvent event) {
+        int index = tableView.getSelectionModel().getSelectedIndex();
+        Employee selectedEmployee = tableView.getSelectionModel().getSelectedItem();
+        System.out.println("Selected employee: " + selectedEmployee);
+        tableView.getSelectionModel().select(index);
+        firstNameText.setText(selectedEmployee.getFirst_name());
+        lastNameText.setText(selectedEmployee.getLast_name());
+        ageText.setText(Integer.toString(selectedEmployee.getAge()));
+        emailText.setText(selectedEmployee.getEmail());
+    }
     
     
     @Override
