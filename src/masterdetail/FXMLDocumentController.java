@@ -49,7 +49,7 @@ public class FXMLDocumentController implements Initializable {
             String sql = "INSERT INTO Employees (first_name, last_name, age, email) " +
                          "VALUES (?, ?, ?, ?)";
             stmt = connection.prepareStatement(sql);
-
+            
             // Set the values for the statement
             stmt.setString(1, firstName);
             stmt.setString(2, lastName);
