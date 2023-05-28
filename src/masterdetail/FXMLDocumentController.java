@@ -92,6 +92,52 @@ public class FXMLDocumentController implements Initializable {
         
     }
    
+    
+    
+    @FXML
+    private void handleDeleteButtonAction(ActionEvent event) {
+        
+        String firstName = firstNameText.getText();
+        String lastName = lastNameText.getText();
+        String age = ageText.getText(); 
+        String email = emailText.getText();
+        
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        
+        try {
+            connection = connect.ConnectToDatabase();
+            
+            String sql = "DELETE FROM employees WHERE email= ?";
+            stmt = connection.prepareStatement(sql);
+            
+            stmt.setString(1, email);
+            stmt.executeUpdate();
+            
+            stmt.close();
+            connection.close();
+            
+            Stage currentStage = (Stage) firstNameText.getScene().getWindow();
+            currentStage.close();
+            MasterDetail masterDetail = new MasterDetail();
+            masterDetail.start(new Stage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            try{
+               if(stmt!=null)
+                  stmt.close();
+            } catch(SQLException se2) {
+            } try {
+               if(connection!=null)
+                  connection.close();
+            } catch(SQLException se){
+               se.printStackTrace();
+            }
+         }
+        
+    }
+    
     @FXML
     private void TableMouseClickAction(MouseEvent event) {
         int index = tableView.getSelectionModel().getSelectedIndex();

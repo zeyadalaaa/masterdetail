@@ -62,7 +62,6 @@ public class MasterDetail extends Application {
                 String departmentName = resultSet.getString("departments.name");
                 String departmentSection = resultSet.getString("departments.section");
                 
-                System.out.print(employeeFirst_Name+ " "+ departmentID +" " + departmentName +" "+ departmentSection);
                 Department department = new Department(departmentID,departmentName,departmentSection);
                 Employee employee = new Employee(employeeId, employeeFirst_Name, employeesLast_name, employeesAge, employeesEmail, department);
 
