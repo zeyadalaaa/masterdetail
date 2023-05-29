@@ -14,14 +14,16 @@ public class Employee {
     private String last_name;
     private int age;
     private String email;
+    private int department_id;
     private Department department;
 
-    public Employee(int id, String first_name, String last_name, int age, String email, Department department) {
+    public Employee(int id, String first_name, String last_name, int age, String email,int department_id, Department department) {
         this.id = id;
         this.first_name = first_name;
         this.last_name = last_name;
         this.age = age;
         this.email = email;
+        this.department_id = department_id;
         this.department = department;
     }
 
@@ -63,6 +65,14 @@ public class Employee {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public int getDepartment_id() {
+        return department_id;
+    }
+
+    public void setDepartment_id(int department_id) {
+        this.department_id = department_id;
     }
 
     public Department getDepartment() {
