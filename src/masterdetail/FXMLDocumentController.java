@@ -14,14 +14,21 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+
 
 /**
  *
@@ -40,6 +47,8 @@ public class FXMLDocumentController implements Initializable {
     private TextField emailText;
     @FXML
     TableView<Employee> tableView;
+    @FXML
+    ComboBox<String> departmentComboBox;
     
     
     
@@ -101,15 +110,16 @@ public class FXMLDocumentController implements Initializable {
         String firstName = firstNameText.getText();
         String lastName = lastNameText.getText();
         String age = ageText.getText(); 
-        String email = emailText.getText();
+        String email = emailText.getText();            
+        
+        String sql = "UPDATE employees SET first_name = ?, last_name = ?, age = ? ,email = ? WHERE id = ?";
         
         Connection connection = null;
         PreparedStatement stmt = null;
         
         try {
             connection = connect.ConnectToDatabase();
-            
-            String sql = "UPDATE employees SET first_name = ?, last_name = ?, age = ? ,email = ? WHERE id = ?";
+
             stmt = connection.prepareStatement(sql);
             
             stmt.setString(1, firstName);
@@ -202,6 +212,42 @@ public class FXMLDocumentController implements Initializable {
         emailText.setText(selectedEmployee.getEmail());
     }
     
+    @FXML
+    private void SwitchSceneButton(MouseEvent event)throws Exception {
+            Parent root = FXMLLoader.load(getClass().getResource("FXMLDepartment.fxml"));
+            Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(    root);
+            stage.setScene(scene);
+            stage.show();
+    }
+    
+    @FXML
+    private void populateDepartmentComboBox(MouseEvent event) {
+        
+        String sql = "SELECT * FROM departments;";
+        
+//        departmentComboBox = new ComboBox<>();
+        ObservableList<String> list = FXCollections.observableArrayList("");
+        departmentComboBox.setItems(list);
+//        System.out.println(sql);
+        ConnectDB connection = new ConnectDB();
+        try (
+            Connection connection1 =connection.ConnectToDatabase();
+            PreparedStatement statement = connection1.prepareStatement(sql);
+            ResultSet resultSet = statement.executeQuery()) {
+            
+            while (resultSet.next()) {
+                String departmentID = resultSet.getString("id");
+                String departmentName = resultSet.getString("name");
+                String departmentSection = resultSet.getString("section");
+                departmentComboBox.getItems().add(departmentName + ", "+ departmentSection);
+            }
+            statement.close();
+            connection1.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
