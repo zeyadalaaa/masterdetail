@@ -27,8 +27,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.util.Callback;
 /**
  *
  * @author Zeyad.Alaa
@@ -43,7 +47,7 @@ public class MasterDetail extends Application {
         ObservableList<Employee> employeeData = FXCollections.observableArrayList();
         try{
 //            String sql =    "SELECT * FROM masterdetail.employees;";
-            String sql = "SELECT * FROM employees "
+            String sql = "SELECT *, departments.name, departments.section FROM employees "
                 + "LEFT JOIN departments ON employees.department_id = departments.id ";
       
             Statement statement =  connection1.createStatement();
@@ -53,7 +57,7 @@ public class MasterDetail extends Application {
 //            System.out.print(statement);
 //            System.out.print(resultSet);
             
-    
+            int i =0;
             while (resultSet.next()) {
                 int employeeId = resultSet.getInt("id");
                 String employeeFirst_Name = resultSet.getString("first_name");
@@ -64,10 +68,16 @@ public class MasterDetail extends Application {
                 String departmentName = resultSet.getString("departments.name");
                 String departmentSection = resultSet.getString("departments.section");
                 
+//            System.out.print(departmentName +" "+departmentSection);
                 Department department = new Department(departmentID,departmentName,departmentSection);
-                Employee employee = new Employee(employeeId, employeeFirst_Name, employeesLast_name, employeesAge, employeesEmail, department);
+                Employee employee = new Employee(employeeId, employeeFirst_Name, employeesLast_name,
+                                                employeesAge, employeesEmail,departmentID, department);
 
                 employeeData.add(employee);
+                System.out.println("Employee1: " + employeeData.get(i).getDepartment().getName());
+                i++;
+                System.out.println("Employee2: " + employee.getDepartment().getName());
+                
             }
             statement.close();
             return employeeData;
@@ -92,7 +102,11 @@ public class MasterDetail extends Application {
     @FXML
     TableColumn<Employee, String> emailColumn ;
     @FXML
-    TableColumn<Employee, String> department ;
+    TableColumn<Employee, Integer> department_ID ;
+    @FXML
+    TableColumn<Employee, String> department_name ;
+    @FXML
+    TableColumn<Employee, String> department_section ;
     
     public void tableUpdate(Parent root) throws Exception{
         try {
@@ -106,22 +120,43 @@ public class MasterDetail extends Application {
             lastNameColumn = new TableColumn<>("last_name");
             ageColumn = new TableColumn<>("age");
             emailColumn = new TableColumn<>("email");
-//            department = new TableColumn<>("department");
+            department_ID = new TableColumn<>("department_id");
+            department_name = new TableColumn<>("department.name");
+            department_section = new TableColumn<>("department.section");
 
             idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
             FirstNameColumn.setCellValueFactory(new PropertyValueFactory<>("first_name"));
             lastNameColumn.setCellValueFactory(new PropertyValueFactory<>("last_name"));
             ageColumn.setCellValueFactory(new PropertyValueFactory<>("age"));
             emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
-//            department.setCellValueFactory(new PropertyValueFactory<>("department"));
-
+            department_ID.setCellValueFactory(new PropertyValueFactory<>("department_id"));
+//            department_name.setCellValueFactory(new PropertyValueFactory<>("department.name"));
             
-            tableView.getColumns().addAll(idColumn, FirstNameColumn, lastNameColumn, ageColumn, emailColumn);
+            department_name.setCellValueFactory(new Callback<CellDataFeatures<Employee, String>, ObservableValue<String>>() {
+                @Override
+                public ObservableValue<String> call(CellDataFeatures<Employee, String> data) {
+                    return new SimpleStringProperty(data.getValue().getDepartment().getName());
+                }
+            });
+//            department_section.setCellValueFactory(new PropertyValueFactory<>("department.section"));
+
+            department_section.setCellValueFactory(new Callback<CellDataFeatures<Employee, String>, ObservableValue<String>>() {
+                @Override
+                public ObservableValue<String> call(CellDataFeatures<Employee, String> data) {
+                    return new SimpleStringProperty(data.getValue().getDepartment().getSection());
+                }
+            });
+            
+            tableView.getColumns().addAll(idColumn, FirstNameColumn, lastNameColumn,
+                                            ageColumn, emailColumn, department_ID,
+                                            department_name,department_section);
 
             // Retrieve data from the database and populate the table
             ObservableList<Employee> employeeData = retrieveDataFromDatabase(connection1);
             tableView.setItems(employeeData);
             
+//System.out.println("Employee1: " + employeeData.get(3).getDepartment().getName());
+//System.out.println("Employee: " + employeeData.get(2).getDepartment().getName());
             connection1.close();
         } catch (Exception e) {
             e.printStackTrace();
