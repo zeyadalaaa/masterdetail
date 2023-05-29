@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane id="AnchorPane" prefHeight="416.0" prefWidth="643.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="masterdetail.FXMLDocumentController">
+<AnchorPane id="AnchorPane" prefHeight="491.0" prefWidth="771.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="masterdetail.FXMLDocumentController">
     <children>
-        <Button fx:id="AddButton" layoutX="61.0" layoutY="262.0" onAction="#handleAddButtonAction" prefHeight="25.0" prefWidth="51.0" text="Add" />
-      <Button fx:id="UpdateButton" layoutX="134.0" layoutY="262.0" onAction="#handleUpdateButtonAction" text="Update" />
-      <Button fx:id="DeleteButton" layoutX="208.0" layoutY="262.0" onAction="#handleDeleteButtonAction" text="Delete" />
-      <Label layoutX="61.0" layoutY="110.0" text="Name" />
-      <Label layoutX="61.0" layoutY="149.0" text="Age" />
-      <Label layoutX="61.0" layoutY="191.0" text="Email" />
-      <TableView fx:id="tableView" layoutX="322.0" layoutY="91.0" onMouseClicked="#TableMouseClickAction" prefHeight="200.0" prefWidth="297.0" />
-      <TextField fx:id="firstNameText" layoutX="107.0" layoutY="107.0" prefHeight="25.0" prefWidth="77.0" />
-      <TextField fx:id="lastNameText" layoutX="191.0" layoutY="107.0" prefHeight="25.0" prefWidth="77.0" />
-      <TextField fx:id="ageText" layoutX="105.0" layoutY="147.0" prefHeight="25.0" prefWidth="163.0" />
-      <TextField fx:id="emailText" layoutX="106.0" layoutY="187.0" prefHeight="25.0" prefWidth="163.0" />
+        <Button fx:id="AddButton" layoutX="29.0" layoutY="294.0" onAction="#handleAddButtonAction" prefHeight="25.0" prefWidth="51.0" text="Add" />
+      <Button fx:id="UpdateButton" layoutX="132.0" layoutY="294.0" onAction="#handleUpdateButtonAction" text="Update" />
+      <Button fx:id="DeleteButton" layoutX="231.0" layoutY="294.0" onAction="#handleDeleteButtonAction" text="Delete" />
+      <Label layoutX="22.0" layoutY="114.0" text="Name" />
+      <Label layoutX="22.0" layoutY="153.0" text="Age" />
+      <Label layoutX="22.0" layoutY="195.0" text="Email" />
+      <TableView fx:id="tableView" layoutX="316.0" layoutY="93.0" onMouseClicked="#TableMouseClickAction" prefHeight="238.0" prefWidth="433.0" />
+      <TextField fx:id="firstNameText" layoutX="134.0" layoutY="112.0" prefHeight="25.0" prefWidth="77.0" />
+      <TextField fx:id="lastNameText" layoutX="218.0" layoutY="112.0" prefHeight="25.0" prefWidth="77.0" />
+      <TextField fx:id="ageText" layoutX="132.0" layoutY="152.0" prefHeight="25.0" prefWidth="163.0" />
+      <TextField fx:id="emailText" layoutX="133.0" layoutY="192.0" prefHeight="25.0" prefWidth="163.0" />
+      <ComboBox fx:id="departmentComboBox" layoutX="132.0" layoutY="229.0" onMouseClicked="#populateDepartmentComboBox" prefHeight="25.0" prefWidth="163.0" />
+      <Label layoutX="22.0" layoutY="232.0" text="Department name" />
+      <Button fx:id="switchScene" layoutX="120.0" layoutY="388.0" mnemonicParsing="false" onMouseClicked="#SwitchSceneButton" text="Add Depratment" />
     </children>
 </AnchorPane>

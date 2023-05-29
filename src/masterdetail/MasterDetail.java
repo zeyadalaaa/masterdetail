@@ -27,6 +27,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.event.ActionEvent;
+import javafx.scene.control.ComboBox;
 /**
  *
  * @author Zeyad.Alaa
@@ -133,7 +135,6 @@ public class MasterDetail extends Application {
     public void start(Stage stage) throws Exception {
             Parent root = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
             tableUpdate(root);
-
             Scene scene = new Scene(    root);
 
             stage.setScene(scene);
