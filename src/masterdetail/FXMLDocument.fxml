@@ -22,6 +22,7 @@
       <TextField fx:id="emailText" layoutX="133.0" layoutY="192.0" prefHeight="25.0" prefWidth="163.0" />
       <ComboBox fx:id="departmentComboBox" layoutX="132.0" layoutY="229.0" onMouseClicked="#populateDepartmentComboBox" prefHeight="25.0" prefWidth="163.0" />
       <Label layoutX="22.0" layoutY="232.0" text="Department name" />
-      <Button fx:id="switchScene" layoutX="120.0" layoutY="388.0" mnemonicParsing="false" onMouseClicked="#SwitchSceneButton" text="Add Depratment" />
+      <Button fx:id="switchScene" layoutX="54.0" layoutY="388.0" mnemonicParsing="false" onMouseClicked="#SwitchDepartmentSceneButton" text="Add Depratment" />
+      <Button fx:id="switchScene2" layoutX="175.0" layoutY="388.0" mnemonicParsing="false" onMouseClicked="#SwitchSectionSceneButton" prefHeight="25.0" prefWidth="105.0" text="Add Section" />
     </children>
 </AnchorPane>
