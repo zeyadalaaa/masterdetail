@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 
-
-<AnchorPane id="AnchorPane" prefHeight="354.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/19" fx:controller="masterdetail.FXMLSectionController">
+<AnchorPane id="AnchorPane" prefHeight="354.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="masterdetail.FXMLSectionController">
    <children>
-      <Label fx:id="sectionLabel" layoutX="150.0" layoutY="156.0" text="Section Name" />
-      <TextField fx:id="sectionNameText" layoutX="249.0" layoutY="152.0" prefHeight="25.0" prefWidth="202.0" />
-      <Button fx:id="back" layoutX="504.0" layoutY="257.0" mnemonicParsing="false" onMouseClicked="#Back" text="Back" />
-      <Button layoutX="260.0" layoutY="218.0" onAction="#addSection" text="Add Section" />
-      <ComboBox fx:id="departmentComboBox" layoutX="249.0" layoutY="84.0" onMouseClicked="#populateDepartmentComboBox" prefHeight="25.0" prefWidth="202.0" />
-      <Label layoutX="150.0" layoutY="88.0" text="Department" />
+      <Label fx:id="sectionLabel" layoutX="11.0" layoutY="156.0" text="Section Name" />
+      <TextField fx:id="sectionNameText" layoutX="110.0" layoutY="152.0" prefHeight="25.0" prefWidth="130.0" />
+      <HBox layoutX="512.0" layoutY="290.0">
+         <children>
+            <Button fx:id="back" mnemonicParsing="false" onMouseClicked="#Back" text="Back" />
+         </children>
+      </HBox>
+      <Button layoutX="85.0" layoutY="214.0" onAction="#addSection" text="Add Section" />
+      <TableView fx:id="tableView" layoutX="263.0" layoutY="65.0" prefHeight="200.0" prefWidth="315.0" />
    </children>
 </AnchorPane>

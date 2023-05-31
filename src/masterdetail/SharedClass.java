@@ -38,4 +38,28 @@ abstract class SharedClass {
         return departmentId;
     }
 
+   
+   public  int getSectionId(String name){
+        int sectionId = 0;
+
+        try {
+            ConnectDB connection = new ConnectDB();
+
+            String STP= "CALL getSectionId(?)";
+            Connection connection1 =connection.ConnectToDatabase();
+            CallableStatement statement = null;
+            ResultSet resultSet = connection.getDepartmentId(connection1,statement,STP,
+                                        name);
+
+            if (resultSet.next()) {
+                sectionId = resultSet.getInt("id");
+            }
+            connection1.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return sectionId;
+    }
+
 }

@@ -11,12 +11,14 @@ package masterdetail;
 public class Department {
     private int id;
     private String name;
-    private String section;
+    private int employees_number;
+    private Section section;
     
-    public Department(int id, String name, String section) {
+    public Department(int id, String name,int employees_number, Section section) {
         this.id = id;
         this.name = name;
         this.section = section;
+        this.employees_number = employees_number;
     }
     
     public int getId() {
@@ -31,15 +33,23 @@ public class Department {
         return name;
     }
 
+    public int getEmployees_number() {
+        return employees_number;
+    }
+
+    public void setEmployees_number(int employees_number) {
+        this.employees_number = employees_number;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
 
-    public String getSection() {
+    public Section getSection() {
         return section;
     }
 
-    public void setSection(String section) {
+    public void setSection(Section section) {
         this.section = section;
     }
 

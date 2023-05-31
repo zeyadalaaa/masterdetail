@@ -17,6 +17,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -24,6 +28,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
@@ -43,65 +48,41 @@ public class FXMLDocumentController extends SharedClass implements Initializable
     @FXML
     private TextField lastNameText;
     @FXML
-    private TextField ageText;
-    @FXML
     private TextField emailText;
     @FXML
     TableView<Employee> tableView;
     @FXML
-    ComboBox<String> departmentComboBox;
-    
-    
-//    private int getDepartmentId(String name){
-//        int departmentId = 0;
-//        
-//        try {
-//            ConnectDB connection = new ConnectDB();
-//            
-//            String STP= "CALL getDepartmentId(?)";
-//            Connection connection1 =connection.ConnectToDatabase();
-//            CallableStatement statement = null;
-//            ResultSet resultSet = connection.getDepartmentId(connection1,statement,STP,
-//                                        name);
-//            
-//            if (resultSet.next()) {
-//                departmentId = resultSet.getInt("id");
-//            }
-//            connection1.close();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return departmentId;
-//    }
+    ComboBox<String> departmentComboBox;    
+    @FXML
+    private DatePicker date;
+    @FXML
+    private ComboBox<String> sectionComboBox;
     
     @FXML
     private void handleAddButtonAction(ActionEvent event) {
-        
         String firstName = firstNameText.getText();
         String lastName = lastNameText.getText();
-        String age = ageText.getText();
+        LocalDate localDate = date.getValue();
+        java.sql.Date DateSQL = java.sql.Date.valueOf(localDate);
         String email = emailText.getText();
-        String selectedDepartment = departmentComboBox.getValue(); 
-        String[] departmentParts = selectedDepartment.split(", ");
-        String departmentName = departmentParts[0];
-        String departmentSection = departmentParts[1];
+        String departmentName = departmentComboBox.getValue(); 
         int departmentId = super.getDepartmentId(departmentName);
+        String sectionName = sectionComboBox.getValue(); 
+        int sectionId = super.getSectionId(sectionName);
         
         try {
             ConnectDB connection = new ConnectDB();
             
-            String STP= "CALL addEmployee(?,?,?,?,?)";
+            String STP= "CALL addEmployee(?,?,?,?,?,?)";
             Connection connection1 =connection.ConnectToDatabase();
             CallableStatement statement = null;
             connection.addEmployee(connection1,statement,STP,
-                                    firstName,lastName,age,email,departmentId);
-            
-            incrementDepartmentEmployeeCount(departmentId, connection);
+                                    firstName,lastName,DateSQL,email,departmentId,sectionId);
             connection1.close();
             
             Stage currentStage = (Stage) firstNameText.getScene().getWindow();
             currentStage.close();
+            
             MasterDetail masterDetail = new MasterDetail();
             masterDetail.start(new Stage());
         } catch (Exception e) {
@@ -110,7 +91,6 @@ public class FXMLDocumentController extends SharedClass implements Initializable
         
         
     }
-    
     
     @FXML
     private void handleUpdateButtonAction(ActionEvent event) {
@@ -120,26 +100,22 @@ public class FXMLDocumentController extends SharedClass implements Initializable
         int employeeid = selectedEmployee.getId();
         String firstName = firstNameText.getText();
         String lastName = lastNameText.getText();
-        String age = ageText.getText(); 
+        LocalDate localDate = date.getValue();
+        java.sql.Date DateSQL = java.sql.Date.valueOf(localDate);
         String email = emailText.getText();    
-        String selectedDepartment = departmentComboBox.getValue(); 
-        String[] departmentParts = selectedDepartment.split(", ");
-        String departmentName = departmentParts[0];
-        String departmentSection = departmentParts[1];
-        int prevDepartmentId = selectedEmployee.getDepartment_id();
-        int departmentId = getDepartmentId(departmentName);
+        String departmentName = departmentComboBox.getValue(); 
+        int departmentId = super.getDepartmentId(departmentName);
+        String sectionName = sectionComboBox.getValue(); 
+        int sectionId = super.getSectionId(sectionName);
         
         try {
             ConnectDB connection = new ConnectDB();
             
-            String STP = "CALL updateEmployee(?,?,?,?,?,?)";
+            String STP = "CALL updateEmployee(?,?,?,?,?,?,?)";
             Connection connection1 =connection.ConnectToDatabase();
             CallableStatement statement = null;
             connection.updateEmployee(connection1,statement,STP,
-                                    firstName,lastName,age,email,departmentId,employeeid);
-            
-            incrementDepartmentEmployeeCount(departmentId, connection);
-            decrementDepartmentEmployeeCount(prevDepartmentId, connection);
+                                    firstName,lastName,DateSQL,email,departmentId,employeeid,sectionId);
             
             connection1.close();
             
@@ -152,8 +128,6 @@ public class FXMLDocumentController extends SharedClass implements Initializable
         }
         
     }
-   
-    
     
     @FXML
     private void handleDeleteButtonAction(ActionEvent event) {
@@ -161,16 +135,6 @@ public class FXMLDocumentController extends SharedClass implements Initializable
         Employee selectedEmployee = tableView.getSelectionModel().getSelectedItem();
 
         int employeeid = selectedEmployee.getId();
-        String firstName = firstNameText.getText();
-        String lastName = lastNameText.getText();
-        String age = ageText.getText(); 
-        String email = emailText.getText();
-        String selectedDepartment = departmentComboBox.getValue(); 
-        String[] departmentParts = selectedDepartment.split(", ");
-        String departmentName = departmentParts[0];
-        String departmentSection = departmentParts[1];
-        int departmentId = getDepartmentId(departmentName);
-        
         try {
             ConnectDB connection = new ConnectDB();
             
@@ -180,7 +144,6 @@ public class FXMLDocumentController extends SharedClass implements Initializable
             connection.deleteEmployee(connection1,statement,STP,
                                     employeeid);
             
-            decrementDepartmentEmployeeCount(departmentId, connection);
             connection1.close();
             
             Stage currentStage = (Stage) firstNameText.getScene().getWindow();
@@ -195,20 +158,36 @@ public class FXMLDocumentController extends SharedClass implements Initializable
     
     @FXML
     private void TableMouseClickAction(MouseEvent event) {
+        try{
+        
         int index = tableView.getSelectionModel().getSelectedIndex();
         Employee selectedEmployee = tableView.getSelectionModel().getSelectedItem();
         Department selectedDepartment = selectedEmployee.getDepartment();
+        Section selectedSection = selectedEmployee.getDepartment().getSection();
+        java.sql.Date dateToSet = selectedEmployee.getDOB();
+        java.util.Date utilDate = new java.util.Date(dateToSet.getTime());
+        Instant instant = utilDate.toInstant();
+        ZoneId zoneId = ZoneId.systemDefault();
+        LocalDate localDate = instant.atZone(zoneId).toLocalDate();
+        
+        
         tableView.getSelectionModel().select(index);
         firstNameText.setText(selectedEmployee.getFirst_name());
         lastNameText.setText(selectedEmployee.getLast_name());
-        ageText.setText(Integer.toString(selectedEmployee.getAge()));
+        date.setValue( localDate);
         emailText.setText(selectedEmployee.getEmail());
-        departmentComboBox.setValue(selectedDepartment.getName() + ", " + selectedDepartment.getSection());
+        departmentComboBox.setValue(selectedDepartment.getName());
+        sectionComboBox.setValue(selectedSection.getSectionName());
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
     
     @FXML
     private void SwitchDepartmentSceneButton(MouseEvent event)throws Exception {
             Parent root = FXMLLoader.load(getClass().getResource("FXMLDepartment.fxml"));
+            FXMLDepartmentController md = new FXMLDepartmentController();
+            md.tableUpdate(root);
             Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
             Scene scene = new Scene(    root);
             stage.setScene(scene);
@@ -239,9 +218,8 @@ public class FXMLDocumentController extends SharedClass implements Initializable
             
             while (resultSet.next()) {
                 String departmentID = resultSet.getString("id");
-                String departmentName = resultSet.getString("name");
-                String departmentSection = resultSet.getString("section");
-                departmentComboBox.getItems().add(departmentName +", " +  departmentSection);
+                String departmentName = resultSet.getString("department_name");
+                departmentComboBox.getItems().add(departmentName);
             }
             statement.close();
             connection1.close();
@@ -250,33 +228,30 @@ public class FXMLDocumentController extends SharedClass implements Initializable
         }
     }
     
-    private void incrementDepartmentEmployeeCount(int departmentId,ConnectDB connection) {
-
+    @FXML
+    private void populateSectionComboBox(MouseEvent event) {
+        
+        ObservableList<String> list = FXCollections.observableArrayList("");
+        sectionComboBox.setItems(list);
         try {
-//            statement.setInt(1, departmentId);
-            String STP = "CALL incrementDepartmentEmployeeCount(?)";
-            Connection connection1 = connection.ConnectToDatabase();
-            CallableStatement statement = null;
-            connection.incrementDepartmentEmployeeCount(connection1,statement,STP,departmentId);
+            ConnectDB connection = new ConnectDB();
             
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    private void decrementDepartmentEmployeeCount(int departmentId,ConnectDB connection) {
-                            
-
-        try {
-            String STP = "CALL decrementDepartmentEmployeeCount(?)";
-            Connection connection1 = connection.ConnectToDatabase();
+            String STP = "CALL getSection()";
+            Connection connection1 =connection.ConnectToDatabase();
             CallableStatement statement = null;
-            connection.decrementDepartmentEmployeeCount(connection1,statement,STP,departmentId);
+            ResultSet resultSet = connection.getSection(connection1,statement,STP);
             
-        } catch (SQLException e) {
-            e.printStackTrace();
+            while (resultSet.next()) {
+                String sectionID = resultSet.getString("id");
+                String sectionName = resultSet.getString("name");
+                sectionComboBox.getItems().add(sectionName);
+            }
+            statement.close();
+            connection1.close();
+        } catch (Exception e) {
+            
         }
-    }
+    }    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO

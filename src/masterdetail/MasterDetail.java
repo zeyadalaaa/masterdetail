@@ -45,26 +45,28 @@ public class MasterDetail extends Application {
             String STP= "CALL getEmployees()";
             Connection connection1 =connection.ConnectToDatabase();
             CallableStatement statement = null;
-            ResultSet resultSet = connection.getEmployee(connection1,statement,STP);
+            ResultSet resultSet = connection.getEmployees(connection1,statement,STP);
             
             while (resultSet.next()) {
                 int employeeId = resultSet.getInt("id");
                 String employeeFirst_Name = resultSet.getString("first_name");
                 String employeesLast_name = resultSet.getString("last_name");
-                int employeesAge = resultSet.getInt("age");
+                Date employeesDOB = resultSet.getDate("date_of_birth");
                 String employeesEmail = resultSet.getString("email");
                 int departmentID = resultSet.getInt("department_id");
-                String departmentName = resultSet.getString("departments.name");
-                String departmentSection = resultSet.getString("departments.section");
+                int sectionID = resultSet.getInt("section_id");
+                String sectionName = resultSet.getString("section_name");
+                String departmentName = resultSet.getString("department_name");
                 
-                Department department = new Department(departmentID,departmentName,departmentSection);
+                Section section = new Section(sectionID,sectionName);
+                int employee_number = 0;
+                Department department = new Department(departmentID,departmentName,employee_number,section);
                 Employee employee = new Employee(employeeId, employeeFirst_Name, employeesLast_name,
-                                                employeesAge, employeesEmail,departmentID, department);
+                                                employeesDOB, employeesEmail,departmentID, department);
                 
                 employeeData.add(employee);
                 
             }
-            statement.close();
             connection1.close();
             return employeeData;
         }catch(Exception e)
@@ -84,7 +86,7 @@ public class MasterDetail extends Application {
     @FXML
     TableColumn<Employee, String> lastNameColumn ;
     @FXML
-    TableColumn<Employee, Integer> ageColumn ;
+    TableColumn<Employee, Date> DOBColumn ;
     @FXML
     TableColumn<Employee, String> emailColumn ;
     @FXML
@@ -103,7 +105,7 @@ public class MasterDetail extends Application {
             idColumn = new TableColumn<>("id");
             FirstNameColumn = new TableColumn<>("first_name");
             lastNameColumn = new TableColumn<>("last_name");
-            ageColumn = new TableColumn<>("age");
+            DOBColumn = new TableColumn<>("DOB");
             emailColumn = new TableColumn<>("email");
             department_ID = new TableColumn<>("department_id");
             department_name = new TableColumn<>("department.name");
@@ -112,7 +114,7 @@ public class MasterDetail extends Application {
             idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
             FirstNameColumn.setCellValueFactory(new PropertyValueFactory<>("first_name"));
             lastNameColumn.setCellValueFactory(new PropertyValueFactory<>("last_name"));
-            ageColumn.setCellValueFactory(new PropertyValueFactory<>("age"));
+            DOBColumn.setCellValueFactory(new PropertyValueFactory<>("DOB"));
             emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
             department_ID.setCellValueFactory(new PropertyValueFactory<>("department_id"));
             
@@ -126,12 +128,12 @@ public class MasterDetail extends Application {
             department_section.setCellValueFactory(new Callback<CellDataFeatures<Employee, String>, ObservableValue<String>>() {
                 @Override
                 public ObservableValue<String> call(CellDataFeatures<Employee, String> data) {
-                    return new SimpleStringProperty(data.getValue().getDepartment().getSection());
+                    return new SimpleStringProperty(data.getValue().getDepartment().getSection().getSectionName());
                 }
             });
             
             tableView.getColumns().addAll(idColumn, FirstNameColumn, lastNameColumn,
-                                            ageColumn, emailColumn, department_ID,
+                                            DOBColumn, emailColumn, department_ID,
                                             department_name,department_section);
 
             ObservableList<Employee> employeeData = retrieveDataFromDatabase(connection);
