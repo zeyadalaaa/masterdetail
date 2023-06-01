@@ -6,6 +6,7 @@ package masterdetail;
 
 import java.sql.PreparedStatement;
 import java.net.URL;
+import java.sql.CallableStatement;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,6 +17,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -23,6 +28,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
@@ -34,7 +40,7 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author Zeyad.Alaa
  */
-public class FXMLDocumentController implements Initializable {
+public class FXMLDocumentController extends SharedClass implements Initializable {
     ConnectDB connect= new ConnectDB();
     
     @FXML
@@ -42,97 +48,49 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private TextField lastNameText;
     @FXML
-    private TextField ageText;
-    @FXML
     private TextField emailText;
     @FXML
     TableView<Employee> tableView;
     @FXML
-    ComboBox<String> departmentComboBox;
-    
-    
-    private int getDepartmentId(String name, String section){
-        String sql = "SELECT id FROM departments WHERE name = ? AND section = ?;";
-        int departmentId = 0; // Default value to indicate no department found
-
-        
-        
-        Connection connection = null;
-        PreparedStatement stmt = null;
-        
-        try {
-            connection = connect.ConnectToDatabase();
-            stmt = connection.prepareStatement(sql);
-            stmt.setString(1, name);
-            stmt.setString(2, section);
-            ResultSet resultSet = stmt.executeQuery();
-
-            if (resultSet.next()) {
-                departmentId = resultSet.getInt("id");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return departmentId;
-    }
+    ComboBox<String> departmentComboBox;    
+    @FXML
+    private DatePicker date;
+    @FXML
+    private ComboBox<String> sectionComboBox;
     
     @FXML
     private void handleAddButtonAction(ActionEvent event) {
-        
         String firstName = firstNameText.getText();
         String lastName = lastNameText.getText();
-        String age = ageText.getText();
+        LocalDate localDate = date.getValue();
+        java.sql.Date DateSQL = java.sql.Date.valueOf(localDate);
         String email = emailText.getText();
-        String selectedDepartment = departmentComboBox.getValue(); 
-        String[] departmentParts = selectedDepartment.split(", ");
-        String departmentName = departmentParts[0];
-        String departmentSection = departmentParts[1];
-        int departmentId = getDepartmentId(departmentName, departmentSection);
-        
-        Connection connection = null;
-        PreparedStatement stmt = null;
+        String departmentName = departmentComboBox.getValue(); 
+        int departmentId = super.getDepartmentId(departmentName);
+        String sectionName = sectionComboBox.getValue(); 
+        int sectionId = super.getSectionId(sectionName);
         
         try {
-            connection = connect.ConnectToDatabase();
+            ConnectDB connection = new ConnectDB();
             
-            String sql = "INSERT INTO Employees (first_name, last_name, age, email, department_id) " +
-                         "VALUES (?, ?, ?, ?, ?)";
-            stmt = connection.prepareStatement(sql);
-            
-            stmt.setString(1, firstName);
-            stmt.setString(2, lastName);
-            stmt.setString(3, age);
-            stmt.setString(4, email);
-            stmt.setInt(5, departmentId);
-            stmt.executeUpdate();
-            
-            
-            incrementDepartmentEmployeeCount(departmentId, connection);
-            stmt.close();
-            connection.close();
+            String STP= "CALL addEmployee(?,?,?,?,?,?)";
+            Connection connection1 =connection.ConnectToDatabase();
+            CallableStatement statement = null;
+            connection.addEmployee(connection1,statement,STP,
+                                    firstName,lastName,DateSQL,email,departmentId,sectionId);
+            connection1.close();
             
             Stage currentStage = (Stage) firstNameText.getScene().getWindow();
             currentStage.close();
+            
             MasterDetail masterDetail = new MasterDetail();
             masterDetail.start(new Stage());
         } catch (Exception e) {
             e.printStackTrace();
-        }finally {
-            try{
-               if(stmt!=null)
-                  stmt.close();
-            } catch(SQLException se2) {
-            } try {
-               if(connection!=null)
-                  connection.close();
-            } catch(SQLException se){
-               se.printStackTrace();
-            }
-         }
+        }
+        
         
     }
-    
     
     @FXML
     private void handleUpdateButtonAction(ActionEvent event) {
@@ -142,35 +100,24 @@ public class FXMLDocumentController implements Initializable {
         int employeeid = selectedEmployee.getId();
         String firstName = firstNameText.getText();
         String lastName = lastNameText.getText();
-        String age = ageText.getText(); 
+        LocalDate localDate = date.getValue();
+        java.sql.Date DateSQL = java.sql.Date.valueOf(localDate);
         String email = emailText.getText();    
-        String selectedDepartment = departmentComboBox.getValue(); 
-        String[] departmentParts = selectedDepartment.split(", ");
-        String departmentName = departmentParts[0];
-        String departmentSection = departmentParts[1];
-        int prevDepartmentId = selectedEmployee.getDepartment_id();
-        int departmentId = getDepartmentId(departmentName, departmentSection);
-        String sql = "UPDATE employees SET first_name = ?, last_name = ?, age = ? ,email = ?, department_id = ?  WHERE id = ?";
-        Connection connection = null;
-        PreparedStatement stmt = null;
+        String departmentName = departmentComboBox.getValue(); 
+        int departmentId = super.getDepartmentId(departmentName);
+        String sectionName = sectionComboBox.getValue(); 
+        int sectionId = super.getSectionId(sectionName);
         
         try {
-            connection = connect.ConnectToDatabase();
+            ConnectDB connection = new ConnectDB();
             
-            stmt = connection.prepareStatement(sql);
-            stmt.setString(1, firstName);
-            stmt.setString(2, lastName);
-            stmt.setString(3, age);
-            stmt.setString(4, email);
-            stmt.setInt(5, departmentId);
-            stmt.setInt(6, employeeid);
-            stmt.executeUpdate();
+            String STP = "CALL updateEmployee(?,?,?,?,?,?,?)";
+            Connection connection1 =connection.ConnectToDatabase();
+            CallableStatement statement = null;
+            connection.updateEmployee(connection1,statement,STP,
+                                    firstName,lastName,DateSQL,email,departmentId,employeeid,sectionId);
             
-            incrementDepartmentEmployeeCount(departmentId, connection);
-            decrementDepartmentEmployeeCount(prevDepartmentId, connection);
-            
-            stmt.close();
-            connection.close();
+            connection1.close();
             
             Stage currentStage = (Stage) firstNameText.getScene().getWindow();
             currentStage.close();
@@ -178,22 +125,9 @@ public class FXMLDocumentController implements Initializable {
             masterDetail.start(new Stage());
         } catch (Exception e) {
             e.printStackTrace();
-        }finally {
-            try{
-               if(stmt!=null)
-                  stmt.close();
-            } catch(SQLException se2) {
-            } try {
-               if(connection!=null)
-                  connection.close();
-            } catch(SQLException se){
-               se.printStackTrace();
-            }
-         }
+        }
         
     }
-   
-    
     
     @FXML
     private void handleDeleteButtonAction(ActionEvent event) {
@@ -201,67 +135,68 @@ public class FXMLDocumentController implements Initializable {
         Employee selectedEmployee = tableView.getSelectionModel().getSelectedItem();
 
         int employeeid = selectedEmployee.getId();
-        String firstName = firstNameText.getText();
-        String lastName = lastNameText.getText();
-        String age = ageText.getText(); 
-        String email = emailText.getText();
-        String selectedDepartment = departmentComboBox.getValue(); 
-        String[] departmentParts = selectedDepartment.split(", ");
-        String departmentName = departmentParts[0];
-        String departmentSection = departmentParts[1];
-        int departmentId = getDepartmentId(departmentName, departmentSection);
-        
-        Connection connection = null;
-        PreparedStatement stmt = null;
-        
         try {
-            connection = connect.ConnectToDatabase();
-            String sql = "DELETE FROM employees WHERE id = ?";
-            stmt = connection.prepareStatement(sql);
+            ConnectDB connection = new ConnectDB();
             
-            stmt.setInt(1, employeeid);
-            stmt.executeUpdate();
-            decrementDepartmentEmployeeCount(departmentId, connection);
-            stmt.close();
-            connection.close();
+            String STP = "CALL deleteEmployee(?)";
+            Connection connection1 =connection.ConnectToDatabase();
+            CallableStatement statement = null;
+            connection.deleteEmployee(connection1,statement,STP,
+                                    employeeid);
+            
+            connection1.close();
             
             Stage currentStage = (Stage) firstNameText.getScene().getWindow();
             currentStage.close();
             MasterDetail masterDetail = new MasterDetail();
             masterDetail.start(new Stage());
         } catch (Exception e) {
-            e.printStackTrace();
-        }finally {
-            try{
-               if(stmt!=null)
-                  stmt.close();
-            } catch(SQLException se2) {
-            } try {
-               if(connection!=null)
-                  connection.close();
-            } catch(SQLException se){
-               se.printStackTrace();
-            }
-         }
+            
+        }
         
     }
     
     @FXML
     private void TableMouseClickAction(MouseEvent event) {
+        try{
+        
         int index = tableView.getSelectionModel().getSelectedIndex();
         Employee selectedEmployee = tableView.getSelectionModel().getSelectedItem();
         Department selectedDepartment = selectedEmployee.getDepartment();
+        Section selectedSection = selectedEmployee.getDepartment().getSection();
+        java.sql.Date dateToSet = selectedEmployee.getDOB();
+        java.util.Date utilDate = new java.util.Date(dateToSet.getTime());
+        Instant instant = utilDate.toInstant();
+        ZoneId zoneId = ZoneId.systemDefault();
+        LocalDate localDate = instant.atZone(zoneId).toLocalDate();
+        
+        
         tableView.getSelectionModel().select(index);
         firstNameText.setText(selectedEmployee.getFirst_name());
         lastNameText.setText(selectedEmployee.getLast_name());
-        ageText.setText(Integer.toString(selectedEmployee.getAge()));
+        date.setValue( localDate);
         emailText.setText(selectedEmployee.getEmail());
-        departmentComboBox.setValue(selectedDepartment.getName() + ", " + selectedDepartment.getSection());
+        departmentComboBox.setValue(selectedDepartment.getName());
+        sectionComboBox.setValue(selectedSection.getSectionName());
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
     
     @FXML
-    private void SwitchSceneButton(MouseEvent event)throws Exception {
+    private void SwitchDepartmentSceneButton(MouseEvent event)throws Exception {
             Parent root = FXMLLoader.load(getClass().getResource("FXMLDepartment.fxml"));
+            FXMLDepartmentController md = new FXMLDepartmentController();
+            md.tableUpdate(root);
+            Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(    root);
+            stage.setScene(scene);
+            stage.show();
+    }
+    
+    @FXML
+    private void SwitchSectionSceneButton(MouseEvent event)throws Exception {
+            Parent root = FXMLLoader.load(getClass().getResource("FXMLSection.fxml"));
             Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
             Scene scene = new Scene(    root);
             stage.setScene(scene);
@@ -271,57 +206,52 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private void populateDepartmentComboBox(MouseEvent event) {
         
-        String sql = "SELECT * FROM departments;";
-        
-//        departmentComboBox = new ComboBox<>();
         ObservableList<String> list = FXCollections.observableArrayList("");
         departmentComboBox.setItems(list);
-//        System.out.println(sql);
-        ConnectDB connection = new ConnectDB();
-        try (
+        try {
+            ConnectDB connection = new ConnectDB();
+            
+            String STP = "CALL getDepartment()";
             Connection connection1 =connection.ConnectToDatabase();
-            PreparedStatement statement = connection1.prepareStatement(sql);
-            ResultSet resultSet = statement.executeQuery()) {
+            CallableStatement statement = null;
+            ResultSet resultSet = connection.getDepartment(connection1,statement,STP);
             
             while (resultSet.next()) {
                 String departmentID = resultSet.getString("id");
-                String departmentName = resultSet.getString("name");
-                String departmentSection = resultSet.getString("section");
-                departmentComboBox.getItems().add(departmentName +", " +  departmentSection);
+                String departmentName = resultSet.getString("department_name");
+                departmentComboBox.getItems().add(departmentName);
             }
             statement.close();
             connection1.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            
         }
     }
     
-    
-    private void incrementDepartmentEmployeeCount(int departmentId,Connection connection) {
-        String updateQuery = "UPDATE departments SET employee_numbers = employee_numbers + 1 WHERE id = ?;";
-
-        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
-            statement.setInt(1, departmentId);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+    @FXML
+    private void populateSectionComboBox(MouseEvent event) {
+        
+        ObservableList<String> list = FXCollections.observableArrayList("");
+        sectionComboBox.setItems(list);
+        try {
+            ConnectDB connection = new ConnectDB();
+            
+            String STP = "CALL getSection()";
+            Connection connection1 =connection.ConnectToDatabase();
+            CallableStatement statement = null;
+            ResultSet resultSet = connection.getSection(connection1,statement,STP);
+            
+            while (resultSet.next()) {
+                String sectionID = resultSet.getString("id");
+                String sectionName = resultSet.getString("name");
+                sectionComboBox.getItems().add(sectionName);
+            }
+            statement.close();
+            connection1.close();
+        } catch (Exception e) {
+            
         }
-    }
-    
-    private void decrementDepartmentEmployeeCount(int departmentId,Connection connection) {
-        String updateQuery = "UPDATE departments SET employee_numbers = CASE\n" +
-                            " WHEN employee_numbers - 1 < 0 THEN 0 ELSE employee_numbers - 1 \n" +
-                            "END " + 
-                            "WHERE id = ?;" ;
-                            
-
-        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
-            statement.setInt(1, departmentId);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+    }    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO

@@ -4,6 +4,8 @@
  */
 package masterdetail;
 
+import java.sql.Date;
+
 /**
  *
  * @author Zeyad.Alaa
@@ -12,16 +14,16 @@ public class Employee {
     private int id;
     private String first_name;
     private String last_name;
-    private int age;
+    private Date DOB;
     private String email;
     private int department_id;
     private Department department;
 
-    public Employee(int id, String first_name, String last_name, int age, String email,int department_id, Department department) {
+    public Employee(int id, String first_name, String last_name, Date DOB, String email,int department_id, Department department) {
         this.id = id;
         this.first_name = first_name;
         this.last_name = last_name;
-        this.age = age;
+        this.DOB = DOB;
         this.email = email;
         this.department_id = department_id;
         this.department = department;
@@ -51,12 +53,12 @@ public class Employee {
         this.last_name = last_name;
     }
 
-    public int getAge() {
-        return age;
-    }
+    public Date getDOB() {
+        return DOB
+;    }
 
-    public void setAge(int age) {
-        this.age = age;
+    public void setDOB(Date DOB) {
+        this.DOB = DOB;
     }
 
     public String getEmail() {

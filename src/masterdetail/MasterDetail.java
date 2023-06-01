@@ -39,47 +39,35 @@ import javafx.util.Callback;
  */
 public class MasterDetail extends Application {
     
-
-
-    
-    // Method to retrieve data from the database
-    public ObservableList<Employee> retrieveDataFromDatabase(Connection connection1) {
+    public ObservableList<Employee> retrieveDataFromDatabase(ConnectDB connection) {
         ObservableList<Employee> employeeData = FXCollections.observableArrayList();
         try{
-//            String sql =    "SELECT * FROM masterdetail.employees;";
-            String sql = "SELECT *, departments.name, departments.section FROM employees "
-                + "LEFT JOIN departments ON employees.department_id = departments.id ";
-      
-            Statement statement =  connection1.createStatement();
-            ResultSet resultSet = statement.executeQuery(sql);
-            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+            String STP= "CALL getEmployees()";
+            Connection connection1 =connection.ConnectToDatabase();
+            CallableStatement statement = null;
+            ResultSet resultSet = connection.getEmployees(connection1,statement,STP);
             
-//            System.out.print(statement);
-//            System.out.print(resultSet);
-            
-            int i =0;
             while (resultSet.next()) {
                 int employeeId = resultSet.getInt("id");
                 String employeeFirst_Name = resultSet.getString("first_name");
                 String employeesLast_name = resultSet.getString("last_name");
-                int employeesAge = resultSet.getInt("age");
+                Date employeesDOB = resultSet.getDate("date_of_birth");
                 String employeesEmail = resultSet.getString("email");
                 int departmentID = resultSet.getInt("department_id");
-                String departmentName = resultSet.getString("departments.name");
-                String departmentSection = resultSet.getString("departments.section");
+                int sectionID = resultSet.getInt("section_id");
+                String sectionName = resultSet.getString("section_name");
+                String departmentName = resultSet.getString("department_name");
                 
-//            System.out.print(departmentName +" "+departmentSection);
-                Department department = new Department(departmentID,departmentName,departmentSection);
+                Section section = new Section(sectionID,sectionName);
+                int employee_number = 0;
+                Department department = new Department(departmentID,departmentName,employee_number,section);
                 Employee employee = new Employee(employeeId, employeeFirst_Name, employeesLast_name,
-                                                employeesAge, employeesEmail,departmentID, department);
-
+                                                employeesDOB, employeesEmail,departmentID, department);
+                
                 employeeData.add(employee);
-                System.out.println("Employee1: " + employeeData.get(i).getDepartment().getName());
-                i++;
-                System.out.println("Employee2: " + employee.getDepartment().getName());
                 
             }
-            statement.close();
+            connection1.close();
             return employeeData;
         }catch(Exception e)
         {
@@ -98,7 +86,7 @@ public class MasterDetail extends Application {
     @FXML
     TableColumn<Employee, String> lastNameColumn ;
     @FXML
-    TableColumn<Employee, Integer> ageColumn ;
+    TableColumn<Employee, Date> DOBColumn ;
     @FXML
     TableColumn<Employee, String> emailColumn ;
     @FXML
@@ -113,12 +101,11 @@ public class MasterDetail extends Application {
             
             tableView = (TableView<Employee>)root.lookup("#tableView");
             ConnectDB connection = new ConnectDB();
-            Connection connection1 =connection.ConnectToDatabase();
             
             idColumn = new TableColumn<>("id");
             FirstNameColumn = new TableColumn<>("first_name");
             lastNameColumn = new TableColumn<>("last_name");
-            ageColumn = new TableColumn<>("age");
+            DOBColumn = new TableColumn<>("DOB");
             emailColumn = new TableColumn<>("email");
             department_ID = new TableColumn<>("department_id");
             department_name = new TableColumn<>("department.name");
@@ -127,10 +114,9 @@ public class MasterDetail extends Application {
             idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
             FirstNameColumn.setCellValueFactory(new PropertyValueFactory<>("first_name"));
             lastNameColumn.setCellValueFactory(new PropertyValueFactory<>("last_name"));
-            ageColumn.setCellValueFactory(new PropertyValueFactory<>("age"));
+            DOBColumn.setCellValueFactory(new PropertyValueFactory<>("DOB"));
             emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
             department_ID.setCellValueFactory(new PropertyValueFactory<>("department_id"));
-//            department_name.setCellValueFactory(new PropertyValueFactory<>("department.name"));
             
             department_name.setCellValueFactory(new Callback<CellDataFeatures<Employee, String>, ObservableValue<String>>() {
                 @Override
@@ -138,32 +124,26 @@ public class MasterDetail extends Application {
                     return new SimpleStringProperty(data.getValue().getDepartment().getName());
                 }
             });
-//            department_section.setCellValueFactory(new PropertyValueFactory<>("department.section"));
 
             department_section.setCellValueFactory(new Callback<CellDataFeatures<Employee, String>, ObservableValue<String>>() {
                 @Override
                 public ObservableValue<String> call(CellDataFeatures<Employee, String> data) {
-                    return new SimpleStringProperty(data.getValue().getDepartment().getSection());
+                    return new SimpleStringProperty(data.getValue().getDepartment().getSection().getSectionName());
                 }
             });
             
             tableView.getColumns().addAll(idColumn, FirstNameColumn, lastNameColumn,
-                                            ageColumn, emailColumn, department_ID,
+                                            DOBColumn, emailColumn, department_ID,
                                             department_name,department_section);
 
-            // Retrieve data from the database and populate the table
-            ObservableList<Employee> employeeData = retrieveDataFromDatabase(connection1);
+            ObservableList<Employee> employeeData = retrieveDataFromDatabase(connection);
             tableView.setItems(employeeData);
             
-//System.out.println("Employee1: " + employeeData.get(3).getDepartment().getName());
-//System.out.println("Employee: " + employeeData.get(2).getDepartment().getName());
-            connection1.close();
         } catch (Exception e) {
             e.printStackTrace();
         
         }
             
-//            PreparedStatement statement =  connection1.createStatement();
     }
     
     @Override
